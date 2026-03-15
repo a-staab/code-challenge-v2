@@ -45,9 +45,13 @@ export default function RestaurantPermitMap() {
   const yearlyDataEndpoint = `/map-data/?year=${year}`
 
   useEffect(() => {
-    fetch()
+    // AS_TODO: Remove console.log
+    console.log(yearlyDataEndpoint)
+    fetch(yearlyDataEndpoint)
       .then((res) => res.json())
       .then((data) => {
+        console.log(data)
+        setCurrentYearData(data);
         /**
          * TODO: Fetch the data needed to supply to map with data
          */

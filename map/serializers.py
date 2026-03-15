@@ -30,5 +30,5 @@ class CommunityAreaSerializer(serializers.ModelSerializer):
             }
         ]
         """
-
-        pass
+        count = RestaurantPermit.objects.filter(community_area_id = obj.area_id).count()
+        return count
