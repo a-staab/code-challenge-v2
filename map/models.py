@@ -21,3 +21,6 @@ class RestaurantPermit(models.Model):
     street_name = models.CharField(max_length=32, null=True, blank=True)
     location = gis_models.PointField(null=True, blank=True)
     community_area_id = models.CharField(max_length=2, null=True, blank=True)
+
+    def __str__(self):
+        return f'Permit ID: {self.permit_id}, Area: {self.community_area_id}'
