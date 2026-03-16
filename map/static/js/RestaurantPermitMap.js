@@ -44,6 +44,7 @@ export default function RestaurantPermitMap() {
   const yearlyDataEndpoint = `/map-data/?year=${year}`
 
   useEffect(() => {
+    
     fetch(yearlyDataEndpoint)
       .then((res) => res.json())
       .then((data) => {
@@ -55,22 +56,20 @@ export default function RestaurantPermitMap() {
   }, [yearlyDataEndpoint])
 
 
-function getColor(percentageOfPermits) {
-  // Dynamic breaks from current data
-  const percents = currentYearData.map(d => d.num_permits / totalPermits * 
-100).sort((a,b)=>a-b);
-  const q1 = percents[Math.floor(percents.length * 0.25)];
-  const q2 = percents[Math.floor(percents.length * 0.50)];
-  const q3 = percents[Math.floor(percents.length * 0.75)];
-  if (percentageOfPermits >= q3) return communityAreaColors[3];
-  if (percentageOfPermits >= q2) return communityAreaColors[2];
-  if (percentageOfPermits >= q1) return communityAreaColors[1];
-  return communityAreaColors[0];
-}
-
+  function getColor(percentageOfPermits) {
+    // Dynamic breaks from current data
+    const percents = currentYearData.map(d => d.num_permits / totalPermits * 
+      100).sort((a,b)=>a-b);
+    const q1 = percents[Math.floor(percents.length * 0.25)];
+    const q2 = percents[Math.floor(percents.length * 0.50)];
+    const q3 = percents[Math.floor(percents.length * 0.75)];
+    if (percentageOfPermits >= q3) return communityAreaColors[3];
+    if (percentageOfPermits >= q2) return communityAreaColors[2];
+    if (percentageOfPermits >= q1) return communityAreaColors[1];
+    return communityAreaColors[0];
+  }
 
   const setAreaInteraction =
-
     /**
      * TODO: Use the methods below to:
      * 1) Shade each community area according to what percentage of 
@@ -84,14 +83,12 @@ function getColor(percentageOfPermits) {
       const countPermits = communityAreaData?.num_permits || 0;
       const percentageOfPermits = totalPermits > 0 ? countPermits/totalPermits * 100 : 0;
       console.log(percentageOfPermits)
-
       layer.setStyle({ fillOpacity: 0.9, fillColor: getColor(percentageOfPermits) })
-    // layer.on("", () => {
-    //   layer.bindPopup("")
-    //   layer.openPopup()
-    // })
-  }
-    ,[currentYearData, totalPermits]);
+      layer.on('mouseover', () => {
+          layer.bindPopup(`${feature.properties.community}: ${communityAreaData.num_permits} permits`)
+          layer.openPopup()
+        })
+    ;} ,[currentYearData]);
   
   function getTotalandMaxNumPermits(currentYearData) {
     // This could be two functions instead of one, and that would be nicer from a test/maintenance perspective, 
@@ -111,9 +108,6 @@ function getColor(percentageOfPermits) {
   const computedTotals = getTotalandMaxNumPermits(currentYearData);
   const totalPermits = computedTotals.totalPermits;
   const maxNumPermits = computedTotals.maxNumPermits;
-
-
-
 
   return (
     <>
@@ -138,7 +132,7 @@ function getColor(percentageOfPermits) {
           <GeoJSON
             data={RAW_COMMUNITY_AREAS}
             onEachFeature={setAreaInteraction}
-            key={maxNumPermits}
+            key={year}
           />
         ) : null}
       </MapContainer>
