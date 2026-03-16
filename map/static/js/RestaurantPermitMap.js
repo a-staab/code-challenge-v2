@@ -1,5 +1,4 @@
-import React, { useEffect, useState } from "react"
-
+import React, { useEffect, useState, useCallback } from "react"
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet"
 
 import "leaflet/dist/leaflet.css"
@@ -45,28 +44,33 @@ export default function RestaurantPermitMap() {
   const yearlyDataEndpoint = `/map-data/?year=${year}`
 
   useEffect(() => {
-    // AS_TODO: Remove console.log
-    console.log(yearlyDataEndpoint)
     fetch(yearlyDataEndpoint)
       .then((res) => res.json())
       .then((data) => {
-        console.log(data)
-        setCurrentYearData(data);
         /**
          * TODO: Fetch the data needed to supply to map with data
          */
+        setCurrentYearData(data);
       })
   }, [yearlyDataEndpoint])
 
 
-  function getColor(percentageOfPermits) {
-    /**
-     * TODO: Use this function in setAreaInteraction to set a community 
-     * area's color using the communityAreaColors constant above
-     */
-  }
+function getColor(percentageOfPermits) {
+  // Dynamic breaks from current data
+  const percents = currentYearData.map(d => d.num_permits / totalPermits * 
+100).sort((a,b)=>a-b);
+  const q1 = percents[Math.floor(percents.length * 0.25)];
+  const q2 = percents[Math.floor(percents.length * 0.50)];
+  const q3 = percents[Math.floor(percents.length * 0.75)];
+  if (percentageOfPermits >= q3) return communityAreaColors[3];
+  if (percentageOfPermits >= q2) return communityAreaColors[2];
+  if (percentageOfPermits >= q1) return communityAreaColors[1];
+  return communityAreaColors[0];
+}
 
-  function setAreaInteraction(feature, layer) {
+
+  const setAreaInteraction =
+
     /**
      * TODO: Use the methods below to:
      * 1) Shade each community area according to what percentage of 
@@ -74,22 +78,52 @@ export default function RestaurantPermitMap() {
      * 2) On hover, display a popup with the community area's raw 
      * permit count for the year
      */
-    layer.setStyle()
-    layer.on("", () => {
-      layer.bindPopup("")
-      layer.openPopup()
-    })
+    useCallback((feature, layer) => {
+      const name = feature.properties.community;
+      const communityAreaData = currentYearData.find(d => d.name === name);
+      const countPermits = communityAreaData?.num_permits || 0;
+      const percentageOfPermits = totalPermits > 0 ? countPermits/totalPermits * 100 : 0;
+      console.log(percentageOfPermits)
+
+      layer.setStyle({ fillOpacity: 0.9, fillColor: getColor(percentageOfPermits) })
+    // layer.on("", () => {
+    //   layer.bindPopup("")
+    //   layer.openPopup()
+    // })
   }
+    ,[currentYearData, totalPermits]);
+  
+  function getTotalandMaxNumPermits(currentYearData) {
+    // This could be two functions instead of one, and that would be nicer from a test/maintenance perspective, 
+    // but it will be more performant to compute both results together.
+    let totalPermits = 0;
+    // Maximum number of permits held by a single community area in current year data
+    let maxNumPermits = 0
+    for (const community_area of currentYearData) {
+      totalPermits += community_area.num_permits
+      if (community_area.num_permits > maxNumPermits) {
+        maxNumPermits = community_area.num_permits
+      }
+    }
+    return { totalPermits, maxNumPermits };
+  }
+
+  const computedTotals = getTotalandMaxNumPermits(currentYearData);
+  const totalPermits = computedTotals.totalPermits;
+  const maxNumPermits = computedTotals.maxNumPermits;
+
+
+
 
   return (
     <>
       <YearSelect filterVal={year} setFilterVal={setYear} />
       <p className="fs-4">
-        Restaurant permits issued this year: {/* TODO: display this value */}
+        Restaurant permits issued this year: {totalPermits}
       </p>
       <p className="fs-4">
         Maximum number of restaurant permits in a single area:
-        {/* TODO: display this value */}
+        {maxNumPermits}
       </p>
       <MapContainer
         id="restaurant-map"
