@@ -44,7 +44,6 @@ export default function RestaurantPermitMap() {
   const yearlyDataEndpoint = `/map-data/?year=${year}`
 
   useEffect(() => {
-    
     fetch(yearlyDataEndpoint)
       .then((res) => res.json())
       .then((data) => {
@@ -82,7 +81,6 @@ export default function RestaurantPermitMap() {
       const communityAreaData = currentYearData.find(d => d.name === name);
       const countPermits = communityAreaData?.num_permits || 0;
       const percentageOfPermits = totalPermits > 0 ? countPermits/totalPermits * 100 : 0;
-      console.log(percentageOfPermits)
       layer.setStyle({ fillOpacity: 0.9, fillColor: getColor(percentageOfPermits) })
       layer.on('mouseover', () => {
           layer.bindPopup(`${feature.properties.community}: ${communityAreaData.num_permits} permits`)
@@ -132,7 +130,7 @@ export default function RestaurantPermitMap() {
           <GeoJSON
             data={RAW_COMMUNITY_AREAS}
             onEachFeature={setAreaInteraction}
-            key={year}
+            key={maxNumPermits}
           />
         ) : null}
       </MapContainer>
