@@ -77,6 +77,7 @@ export default function RestaurantPermitMap() {
      * permit count for the year
      */
     useCallback((feature, layer) => {
+      console.log(currentYearData)
       const name = feature.properties.community;
       const communityAreaData = currentYearData.find(d => d.name === name);
       const countPermits = communityAreaData?.num_permits || 0;

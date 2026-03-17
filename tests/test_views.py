@@ -35,6 +35,39 @@ def test_map_data_view():
     # Query the map data endpoint
     client = APIClient()
     response = client.get(reverse("map_data", query={"year": 2021}))
+    actual_num_permits_Beverly = 0
+    actual_num_permits_LincolnPark = 0
+    
+    for data in response.data:
+        if data.get('name') == "Beverly":
+            actual_num_permits_Beverly = data.get('num_permits')
+        if data.get('name') == "Lincoln Park":
+            actual_num_permits_LincolnPark = data.get('num_permits')
+    
+    expected_num_permits_Beverly = 2
+    assert actual_num_permits_Beverly == expected_num_permits_Beverly
+    
+    expected_num_permits_LincolnPark = 3
+    assert actual_num_permits_LincolnPark == actual_num_permits_LincolnPark
+
+    assert len(response.data) == 2
+    
+
+
+    #  [
+    #         {
+    #             "ROGERS PARK": {
+    #                 area_id: 17,
+    #                 num_permits: 2
+    #             },
+    #             "BEVERLY": {
+    #                 area_id: 72,
+    #                 num_permits: 2
+    #             },
+    #             ...
+    #         }
+    #     ]
+    
 
     # TODO: Complete the test by asserting that the /map-data/ endpoint
     # returns the correct number of permits for Beverly and Lincoln 
