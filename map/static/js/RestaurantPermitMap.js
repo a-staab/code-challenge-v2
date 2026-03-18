@@ -89,7 +89,7 @@ export default function RestaurantPermitMap() {
   
   function getTotalandMaxNumPermits(currentYearData) {
     // This could be two functions instead of one, and that would be nicer from a test/maintenance perspective, 
-    // but it will be more efficient to compute both results together.
+    // but it will be faster to compute both results together.
     let totalPermits = 0;
     // Maximum number of permits held by a single community area in current year data
     let maxNumPermits = 0
